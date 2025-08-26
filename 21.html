@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+
+    <h2>Submit Data to SheetDB</h2>
+    <form id="sheetdb-form" action="https://sheetdb.io/api/v1/fbuu8440rq8d1" method="POST">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" required><br><br>
+        <label for="email">Email:</label>
+        <input type="email" id="email" name="email" required><br><br>
+        <button type="submit">Submit</button>
+    </form>
+    <div id="response"></div>
+    <button id="get-data">Get Data</button>
+    <div id="data-list"></div>
+
+    <script>
+        document.getElementById('sheetdb-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            fetch('https://sheetdb.io/api/v1/fbuu8440rq8d1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    data: [{ name: name, email: email }]
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('response').innerText = 'Submitted successfully!';
+            })
+            .catch(error => {
+                document.getElementById('response').innerText = 'Error submitting data.';
+            });
+        });
+
+        document.getElementById('get-data').addEventListener('click', function() {
+            fetch('https://sheetdb.io/api/v1/fbuu8440rq8d1')
+                .then(response => response.json())
+                .then(data => {
+                    let html = '<h3>SheetDB Data:</h3><ul>';
+                    data.forEach(row => {
+                        html += `<li>Name: ${row.name || ''}, Email: ${row.email || ''}</li>`;
+                    });
+                    html += '</ul>';
+                    document.getElementById('data-list').innerHTML = html;
+                })
+        });
+    </script>
+</body>
+</html>
