@@ -1,0 +1,1 @@
+alert("from 3.js");

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .box {
+            width: 300px;
+            height: 596px;
+            background-color: lightblue;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 20px;
+            position: absolute;
+            align-items: center;
+            text-align: center;
+        }
+
+        select {
+            width: 100%;
+            padding: 5px;
+            margin-top: 10px;
+        }
+    </style>
+    <!-- <script src="3.js"></script> -->
+</head>
+
+<body>
+
+    <h1>Fill Form</h1>
+    <div class="box">
+        <form action="post">
+            <fieldset>
+                <legend>Personal Information</legend>
+                <label for="name">Name:</label><br>
+                <input type="text" id="name" name="name" required><br><br>
+
+                <label for="email">Email:</label><br>
+                <input type="email" id="email" name="email" required><br><br>
+
+                <label for="password">Password:</label><br>
+                <input type="password" id="password" name="password" required><br>
+                <br>
+            </fieldset>
+
+            <fieldset>
+                <legend>Address</legend>
+                <label for="address">Address:</label><br>
+                <input type="text" id="address" name="address" required><br><br>
+
+                <label for="pincode">Pincode:</label><br>
+                <input type="text" id="city" name="city" required><br><br>
+
+                <label for="home">HomeNo:</label><br>
+                <input type="text" id="home" name="home" required><br><br>
+            </fieldset>
+
+            <fieldset>
+                <legend>Card details</legend>
+                <label for="card">Card Type:</label><br>
+                <select id="card" name="card">
+                    <option value="visa">Visa</option>
+                    <option value="dcard">DebitCard</option>
+                    <option value="amex">American Express</option>
+                </select><br><br>
+
+                <label for="number">Card Number:</label><br>
+                <input type="text" id="number" name="number" required><br><br>
+            </fieldset>
+            <button type="submit">Submit</button>
+            <button type="reset">Reset</button>
+        </form>
+    </div>
+
+    <!-- <script>
+        // alert("hello!");
+        document.write("hello world");
+        document.write("<h1>hello world</h1>")
+    </script> -->
+</body>
+
+</html>
