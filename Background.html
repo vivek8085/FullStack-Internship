@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Background Changer</title>
+  <style>
+    :root{--panel-bg:rgba(255,255,255,0.9);--accent:#111827}
+    *{box-sizing:border-box;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    html,body{height:100%;margin:0}
+    body{display:grid;place-items:center;transition:background 400ms ease,filter 400ms ease;background:#0f172a;color:var(--accent)}
+    .app{width:min(940px,94vw);background:var(--panel-bg);backdrop-filter:blur(6px);border-radius:14px;box-shadow:0 8px 30px rgba(2,6,23,0.45);padding:20px}
+    h1{margin:0 0 12px;font-size:20px}
+    .controls{display:flex;gap:12px;flex-wrap:wrap}
+    .group{display:flex;gap:8px;align-items:center}
+    button,select,input[type=file]{appearance:none;border:0;padding:10px 12px;border-radius:8px;background:#111827;color:#fff;cursor:pointer}
+    input[type=color]{width:44px;height:44px;border-radius:8px;border:0;padding:0}
+    .btn-ghost{background:transparent;color:var(--accent);border:1px solid rgba(0,0,0,0.06)}
+    .preview{margin-top:16px;padding:12px;border-radius:10px;background:#fff3;display:flex;gap:12px;align-items:center}
+    .swatches{display:flex;gap:8px}
+    .sw{width:36px;height:36px;border-radius:8px;cursor:pointer;border:2px solid rgba(255,255,255,0.2)}
+    .footer{margin-top:14px;font-size:13px;color:#374151}
+    @media (max-width:560px){.app{padding:14px}.controls{gap:8px}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <h1>Background Changer</h1>
+    <div class="controls">
+      <div class="group">
+        <input id="colorA" type="color" value="#3b82f6">
+        <input id="colorB" type="color" value="#06b6d4">
+        <button id="applyGradient">Apply Gradient</button>
+      </div>
+      <div class="group">
+        <input id="solidColor" type="color" value="#0ea5a4">
+        <button id="applySolid">Apply Solid</button>
+      </div>
+      <div class="group">
+        <button id="randomGradient">Random Gradient</button>
+        <button id="randomSolid">Random Color</button>
+      </div>
+      <div class="group">
+        <label for="imgUpload"><button class="btn-ghost">Upload Image</button></label>
+        <input id="imgUpload" type="file" accept="image/*" style="display:none">
+      </div>
+      <div class="group">
+        <button id="clearBg">Clear</button>
+        <button id="toggleBlur">Toggle Blur</button>
+      </div>
+    </div>
+    <div class="preview">
+      <div style="flex:1">
+        <div style="font-weight:600">Preview</div>
+        <div style="font-size:13px;margin-top:6px">Use the controls to change the page background. Image uploads use data URLs and won't be uploaded anywhere.</div>
+      </div>
+      <div class="swatches">
+        <div class="sw" data-color="#0ea5a4" style="background:#0ea5a4"></div>
+        <div class="sw" data-color="#ef4444" style="background:#ef4444"></div>
+        <div class="sw" data-color="#f97316" style="background:#f97316"></div>
+        <div class="sw" data-color="#8b5cf6" style="background:#8b5cf6"></div>
+      </div>
+    </div>
+    <div class="footer">Tip: drag a local image onto the page to set it as background.</div>
+  </main>
+  <script>
+    const colorA = document.getElementById('colorA')
+    const colorB = document.getElementById('colorB')
+    const applyGradient = document.getElementById('applyGradient')
+    const applySolid = document.getElementById('applySolid')
+    const solidPicker = document.getElementById('solidColor')
+    const randomGradient = document.getElementById('randomGradient')
+    const randomSolid = document.getElementById('randomSolid')
+    const imgUpload = document.getElementById('imgUpload')
+    const clearBg = document.getElementById('clearBg')
+    const toggleBlur = document.getElementById('toggleBlur')
+    const swatches = document.querySelectorAll('.sw')
+
+    function setSolid(c){document.body.style.backgroundImage='';document.body.style.background=c}
+
+    function setGradient(a,b){document.body.style.backgroundImage=`linear-gradient(135deg, ${a}, ${b})`} 
+
+    function randHex(){return '#'+Math.floor(Math.random()*16777215).toString(16).padStart(6,'0')}
+
+    applyGradient.addEventListener('click',()=>setGradient(colorA.value,colorB.value))
+    applySolid.addEventListener('click',()=>setSolid(solidPicker.value))
+    randomGradient.addEventListener('click',()=>setGradient(randHex(),randHex()))
+    randomSolid.addEventListener('click',()=>setSolid(randHex()))
+
+    imgUpload.addEventListener('change',e=>{
+      const f=e.target.files[0]
+      if(!f) return
+      const reader=new FileReader()
+      reader.onload=ev=>{
+        document.body.style.backgroundImage=`url('${ev.target.result}')`
+        document.body.style.backgroundSize='cover'
+        document.body.style.backgroundPosition='center'
+      }
+      reader.readAsDataURL(f)
+    })
+
+    clearBg.addEventListener('click',()=>{document.body.style.background='';document.body.style.backgroundImage='';document.body.style.filter='';})
+
+    toggleBlur.addEventListener('click',()=>{document.body.style.filter=document.body.style.filter?'':'blur(4px)'} )
+
+    swatches.forEach(s=>s.addEventListener('click',e=>setSolid(e.currentTarget.dataset.color)))
+
+    document.addEventListener('dragover',e=>e.preventDefault())
+    document.addEventListener('drop',e=>{
+      e.preventDefault()
+      const f=e.dataTransfer.files[0]
+      if(!f || !f.type.startsWith('image/')) return
+      const r=new FileReader()
+      r.onload=ev=>{
+        document.body.style.backgroundImage=`url('${ev.target.result}')`
+        document.body.style.backgroundSize='cover'
+        document.body.style.backgroundPosition='center'
+      }
+      r.readAsDataURL(f)
+    })
+
+    setGradient(colorA.value,colorB.value)
+  </script>
+</body>
+</html>
