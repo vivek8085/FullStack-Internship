@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Age Calculator</title>
+  <style>
+    body { font-family: Arial, sans-serif; display:flex;justify-content:center;align-items:center;height:100vh;background:#f3f4f6 }
+    .app { background:white;padding:20px;border-radius:10px;box-shadow:0 4px 12px rgba(0,0,0,0.1); width:300px; }
+    input,button { width:100%;padding:10px;margin-top:10px;border:1px solid #ccc;border-radius:6px;font-size:14px; }
+    button { background:#2563eb;color:white;border:none;cursor:pointer }
+    button:hover { background:#1e40af }
+    #result { margin-top:15px;font-weight:bold;font-size:16px;color:#111827 }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <h2>Age Calculator</h2>
+    <input type="text" id="name" placeholder="Enter your name">
+    <input type="date" id="dob">
+    <button id="calcBtn">Calculate Age</button>
+    <div id="result"></div>
+  </div>
+
+  <script>
+    class AgeCalculator {
+      constructor(name, dob) {
+        this.name = name;
+        this.dob = new Date(dob);
+      }
+
+      calculateAge() {
+        const today = new Date();
+        let age = today.getFullYear() - this.dob.getFullYear();
+        const m = today.getMonth() - this.dob.getMonth();
+        if (m < 0 || (m === 0 && today.getDate() < this.dob.getDate())) {
+          age--;
+        }
+        return age;
+      }
+
+      display() {
+        return `Name: ${this.name}<br>Age: ${this.calculateAge()} years`;
+      }
+    }
+
+    document.getElementById("calcBtn").addEventListener("click", () => {
+      const name = document.getElementById("name").value;
+      const dob = document.getElementById("dob").value;
+
+      if (!name || !dob) {
+        document.getElementById("result").innerHTML = "⚠️ Please enter both name and date of birth.";
+        return;
+      }
+
+      const person = new AgeCalculator(name, dob);
+      document.getElementById("result").innerHTML = person.display();
+    });
+  </script>
+</body>
+</html>
