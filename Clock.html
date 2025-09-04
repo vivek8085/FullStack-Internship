@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="synthwave">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Clock</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.css" rel="stylesheet" />
+  <style>
+    /* 3D helpers */
+    .preserve-3d { transform-style: preserve-3d; }
+    .face-shadow { box-shadow: inset 0 0 40px rgba(0,0,0,0.35), 0 20px 60px rgba(0,0,0,0.35); }
+    .glass { background: radial-gradient(ellipse at 30% 30%, rgba(255,255,255,0.15), rgba(255,255,255,0.02) 60%); backdrop-filter: blur(2px); }
+    .edge { box-shadow: 0 0 0 12px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.05) inset; }
+    .floaty { animation: floaty 6s ease-in-out infinite; }
+    @keyframes floaty { 0%,100%{ transform: translateY(-2px) translateZ(0); } 50%{ transform: translateY(4px) translateZ(10px); } }
+
+    /* Tick marks */
+    .tick { position:absolute; left:50%; top:50%; width:2px; height:14px; transform-origin: 50% calc(100% + 60px); opacity:0.8; }
+    .tick-strong { height:18px; width:3px; opacity:1; }
+
+    /* Hands */
+    .hand { position:absolute; left:50%; top:50%; transform-origin: 50% 100%; }
+    .hand.hour   { width:8px; height:70px; border-radius:9999px; }
+    .hand.minute { width:6px; height:100px; border-radius:9999px; }
+    .hand.second { width:2px; height:110px; border-radius:9999px; }
+
+    /* Center cap */
+    .cap { width:16px; height:16px; border-radius:9999px; position:absolute; left:50%; top:50%; transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,0.6); }
+
+    /* Subtle gradient ring */
+    .ring-grad {
+      background: conic-gradient(from 0deg, hsl(var(--s)) 0 25%, hsl(var(--p)) 25% 50%, hsl(var(--a)) 50% 75%, hsl(var(--in)) 75% 100%);
+      filter: blur(10px); opacity: .35; pointer-events:none;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-base-200 flex items-center justify-center p-6">
+  <div class="w-full max-w-4xl">
+    <div class="flex flex-col md:flex-row items-center justify-center gap-8">
+
+      <!-- Clock Card -->
+      <div class="card bg-base-100 shadow-2xl p-6 md:p-8">
+        <div class="card-title items-center justify-between gap-4">
+          <span>⏰ 3D Round Clock</span>
+          <div class="form-control">
+            <div class="input-group">
+              <select id="themeSelect" class="select select-bordered select-sm">
+                <option>light</option>
+                <option selected>dark</option>
+                <option>synthwave</option>
+                <option>retro</option>
+                <option>cyberpunk</option>
+                <option>valentine</option>
+                <option>corporate</option>
+                <option>forest</option>
+                <option>lofi</option>
+                <option>dracula</option>
+                <option>coffee</option>
+                <option>emerald</option>
+              </select>
+              <button id="nowBtn" class="btn btn-sm">Now</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3D Stage -->
+        <div class="mt-6 flex items-center justify-center">
+          <div id="stage" class="relative preserve-3d" style="perspective: 1200px;">
+            <!-- Outer glow ring -->
+            <div class="absolute -inset-6 rounded-full ring-grad"></div>
+
+            <!-- Clock Face -->
+            <div id="clock" class="relative w-80 h-80 md:w-96 md:h-96 rounded-full edge face-shadow glass preserve-3d flex items-center justify-center">
+              <!-- Center hub shadow plane to push depth -->
+              <div class="absolute inset-4 rounded-full bg-base-300/30 preserve-3d"></div>
+
+              <!-- Numbers -->
+              <div class="absolute inset-0 select-none text-base-content/60 font-semibold">
+                <!-- 12 numbers -->
+                <div class="absolute left-1/2 top-4 -translate-x-1/2">12</div>
+                <div class="absolute right-4 top-1/2 -translate-y-1/2">3</div>
+                <div class="absolute left-1/2 bottom-4 -translate-x-1/2">6</div>
+                <div class="absolute left-4 top-1/2 -translate-y-1/2">9</div>
+              </div>
+
+              <!-- Tick marks (generated in JS for all 60) -->
+              <div id="ticks" class="absolute inset-0"></div>
+
+              <!-- Hands -->
+              <div id="hourHand"   class="hand hour bg-primary shadow-lg"></div>
+              <div id="minuteHand" class="hand minute bg-secondary shadow"></div>
+              <div id="secondHand" class="hand second bg-accent"></div>
+
+              <!-- Center cap -->
+              <div class="cap bg-base-100 border border-base-300"></div>
+
+              <!-- Digital readout -->
+              <div class="absolute bottom-8">
+                <div id="digital" class="badge badge-lg badge-outline font-mono tracking-widest">
+                  00:00:00
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="card-actions justify-center mt-6">
+          <div class="join">
+            <button id="tiltToggle" class="btn join-item">Toggle 3D Tilt</button>
+            <button id="floatToggle" class="btn join-item">Toggle Float</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini Help -->
+      <div class="alert alert-info max-w-md">
+        <span>
+          Built with <span class="font-bold">Tailwind</span> + <span class="font-bold">DaisyUI</span>. Updates with <code>setInterval</code> every second.
+          Hover your mouse over the clock to see the 3D tilt, or use the buttons to toggle effects.
+        </span>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // ============== DaisyUI Theme Switcher ==============
+    const themeSelect = document.getElementById('themeSelect');
+    themeSelect.addEventListener('change', (e) => {
+      document.documentElement.setAttribute('data-theme', e.target.value);
+    });
+
+    // ============== Build Tick Marks (60) ==============
+    const ticksEl = document.getElementById('ticks');
+    for (let i = 0; i < 60; i++) {
+      const t = document.createElement('div');
+      const isStrong = i % 5 === 0;
+      t.className = `tick ${isStrong ? 'tick-strong bg-base-content' : 'bg-base-content/60'}`;
+      // Place around circle
+      const angle = i * 6; // degrees
+      t.style.transform = `rotate(${angle}deg) translate(-50%, -50%)`;
+      // Push outward using transform-origin adjustment via CSS (.tick)
+      ticksEl.appendChild(t);
+    }
+
+    // ============== Hands & Digital ==============
+    const hourHand = document.getElementById('hourHand');
+    const minuteHand = document.getElementById('minuteHand');
+    const secondHand = document.getElementById('secondHand');
+    const digital   = document.getElementById('digital');
+
+    function pad(n){ return String(n).padStart(2,'0'); }
+
+    function updateClock(){
+      const now = new Date();
+      const h = now.getHours();
+      const m = now.getMinutes();
+      const s = now.getSeconds();
+
+      const hourAngle   = 30 * (h % 12) + m * 0.5; // 360/12 = 30, plus minute progress
+      const minuteAngle = 6 * m + s * 0.1;         // 360/60 = 6
+      const secondAngle = 6 * s;                   // 360/60 = 6
+
+      hourHand.style.transform   = `translate(-50%, -100%) rotate(${hourAngle}deg)`;
+      minuteHand.style.transform = `translate(-50%, -100%) rotate(${minuteAngle}deg)`;
+      secondHand.style.transform = `translate(-50%, -100%) rotate(${secondAngle}deg)`;
+
+      digital.textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+    }
+
+    // Position hands' anchor (bottom center at the hub)
+    [hourHand, minuteHand, secondHand].forEach(el => {
+      el.style.top = '50%';
+      el.style.left = '50%';
+    });
+
+    // Start interval
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // Quick "Now" button to resync (useful if system lags)
+    document.getElementById('nowBtn').addEventListener('click', updateClock);
+
+    // ============== 3D Tilt Interaction ==============
+    const stage = document.getElementById('stage');
+    const clock = document.getElementById('clock');
+    let enableTilt = true;
+
+    function handleTilt(e){
+      if (!enableTilt) return;
+      const rect = clock.getBoundingClientRect();
+      const cx = rect.left + rect.width / 2;
+      const cy = rect.top + rect.height / 2;
+      const dx = (e.clientX - cx) / (rect.width / 2);
+      const dy = (e.clientY - cy) / (rect.height / 2);
+      const maxTilt = 14; // degrees
+      const rx = dy * -maxTilt; // invert so up tilts back
+      const ry = dx *  maxTilt;
+      clock.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+    }
+
+    function resetTilt(){
+      clock.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    }
+
+    stage.addEventListener('mousemove', handleTilt);
+    stage.addEventListener('mouseleave', resetTilt);
+
+    // Toggle buttons
+    const tiltToggle = document.getElementById('tiltToggle');
+    tiltToggle.addEventListener('click', () => {
+      enableTilt = !enableTilt;
+      tiltToggle.classList.toggle('btn-primary', enableTilt);
+      if (!enableTilt) resetTilt();
+    });
+
+    const floatToggle = document.getElementById('floatToggle');
+    let floating = false;
+    floatToggle.addEventListener('click', () => {
+      floating = !floating;
+      floatToggle.classList.toggle('btn-secondary', floating);
+      clock.classList.toggle('floaty', floating);
+    });
+
+    // Start with nice defaults
+    document.documentElement.setAttribute('data-theme', 'synthwave');
+    tiltToggle.classList.add('btn-primary');
+  </script>
+</body>
+</html>
