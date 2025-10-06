@@ -1,74 +1,55 @@
-CREATE DATABASE IF NOT EXISTS DemoFunctions;
-USE DemoFunctions;
+USE company;
 
-DROP TABLE IF EXISTS Numbers;
-CREATE TABLE Numbers (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  value DECIMAL(10,4)
+SELECT UPPER(emp_name) AS UpperName FROM employees;
+SELECT LOWER(emp_name) AS LowerName FROM employees;
+SELECT CONCAT(first_name, ' ', last_name) AS FullName FROM employees;
+SELECT SUBSTRING(emp_name, 1, 5) AS ShortName FROM employees;
+
+SELECT ABS(salary - 50000) AS SalaryDifference FROM salaries;
+SELECT ROUND(salary, -3) AS RoundedSalary FROM salaries;
+SELECT CEIL(salary) AS CeilSalary FROM salaries;
+SELECT FLOOR(salary) AS FloorSalary FROM salaries;
+
+SELECT NOW() AS CurrentDateTime;
+SELECT CURDATE() AS CurrentDate;
+SELECT emp_name, DATEDIFF(CURDATE(), hire_date) AS DaysWorked FROM employees;
+SELECT emp_name, DATE_ADD(hire_date, INTERVAL 1 YEAR) AS NextAnniversary FROM employees;
+
+SELECT COUNT(*) AS TotalEmployees FROM employees;
+SELECT SUM(salary) AS TotalSalary FROM salaries;
+SELECT AVG(salary) AS AvgSalary FROM salaries;
+SELECT MIN(salary) AS MinSalary FROM salaries;
+SELECT MAX(salary) AS MaxSalary FROM salaries;
+
+
+CREATE DATABASE company;
+USE company;
+
+CREATE TABLE employees (
+    emp_id INT PRIMARY KEY AUTO_INCREMENT,
+    first_name VARCHAR(50),
+    last_name VARCHAR(50),
+    emp_name VARCHAR(100),
+    hire_date DATE
 );
 
-INSERT INTO Numbers (value) VALUES (1.2345),(2.7183),(3.1415),(4.9999),(5.0001),(10.4999);
-
-SELECT id, value, FLOOR(value) AS floored, CEIL(value) AS ceiled FROM Numbers;
-SELECT id, value, ROUND(value,2) AS rounded FROM Numbers;
-
-DROP TABLE IF EXISTS Employees;
-CREATE TABLE Employees (
-  emp_id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  salary DECIMAL(10,2),
-  hire_date DATE
+CREATE TABLE salaries (
+    salary_id INT PRIMARY KEY AUTO_INCREMENT,
+    emp_id INT,
+    salary DECIMAL(10,2),
+    FOREIGN KEY (emp_id) REFERENCES employees(emp_id)
 );
 
-INSERT INTO Employees (name, salary, hire_date) VALUES
-  ('Asha', 52345.75, '2020-05-01'),
-  ('Rahul', 70000.00, '2019-03-15'),
-  ('Maya', 61000.50, '2021-07-21');
+INSERT INTO employees (first_name, last_name, emp_name, hire_date) VALUES
+('John', 'Doe', 'John Doe', '2018-06-12'),
+('Alice', 'Smith', 'Alice Smith', '2020-01-15'),
+('Bob', 'Johnson', 'Bob Johnson', '2019-09-23'),
+('Eve', 'Brown', 'Eve Brown', '2021-05-30'),
+('Charlie', 'Miller', 'Charlie Miller', '2017-11-10');
 
-SELECT name, salary, FLOOR(salary/1000) AS salary_in_thousands_floor, CEIL(salary/1000) AS salary_in_thousands_ceil FROM Employees;
-SELECT name, CONCAT(UPPER(LEFT(name,1)),LOWER(SUBSTRING(name,2))) AS proper_name FROM Employees;
-SELECT name, YEAR(hire_date) AS hire_year, DATEDIFF(CURDATE(), hire_date) AS days_with_company FROM Employees;
-
-SELECT COUNT(*) AS total_employees, AVG(salary) AS avg_salary, SUM(salary) AS sum_salary, MAX(salary) AS max_salary, MIN(salary) AS min_salary FROM Employees;
-
-DELIMITER $$
-CREATE FUNCTION get_bonus(empSalary DECIMAL(10,2)) RETURNS DECIMAL(10,2)
-DETERMINISTIC
-BEGIN
-  DECLARE bonus DECIMAL(10,2);
-  IF empSalary < 60000 THEN
-    SET bonus = empSalary * 0.05;
-  ELSE
-    SET bonus = empSalary * 0.1;
-  END IF;
-  RETURN ROUND(bonus,2);
-END$$
-DELIMITER ;
-
-SELECT name, salary, get_bonus(salary) AS bonus FROM Employees;
-
-DROP FUNCTION IF EXISTS round_down_to_hundred;
-DELIMITER $$
-CREATE FUNCTION round_down_to_hundred(x DECIMAL(10,2)) RETURNS DECIMAL(10,2)
-DETERMINISTIC
-BEGIN
-  RETURN FLOOR(x/100)*100;
-END$$
-DELIMITER ;
-
-SELECT salary, round_down_to_hundred(salary) AS rounded_down FROM Employees;
-
-DROP PROCEDURE IF EXISTS increase_salary_by_percent;
-DELIMITER $$
-CREATE PROCEDURE increase_salary_by_percent(p_percent DECIMAL(5,2))
-BEGIN
-  UPDATE Employees SET salary = salary * (1 + p_percent/100);
-END$$
-DELIMITER ;
-
-CALL increase_salary_by_percent(5);
-SELECT name, salary FROM Employees;
-
-DROP PROCEDURE IF EXISTS increase_salary_by_percent;
-DROP FUNCTION IF EXISTS get_bonus;
-DROP FUNCTION IF EXISTS round_down_to_hundred;
+INSERT INTO salaries (emp_id, salary) VALUES
+(1, 55000),
+(2, 47000),
+(3, 62000),
+(4, 38000),
+(5, 72000);
